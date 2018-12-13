@@ -4,12 +4,12 @@ import fastText
 # classifier = fastText.train_supervised(
 #     input="news_fasttext_train.txt", dim=300, wordNgrams=2, lr=0.5, epoch=20, pretrainedVectors="cc.zh.300.vec")
 
-classifier = fastText.train_supervised(input="news_fasttext_train.txt")
+classifier = fastText.train_supervised(input="corpus/news_fasttext_train.txt")
 
 labels = classifier.get_labels()
 print(labels)
 
-result = classifier.test("news_fasttext_train.txt")
+result = classifier.test("corpus/news_fasttext_train.txt")
 print(result)
 
 classifier.quantize()
