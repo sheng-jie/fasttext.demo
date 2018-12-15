@@ -1,5 +1,5 @@
 
-<h3>新闻分类器</h3>
+<h3>新闻分类器：{{title}}</h3>
 <form action="/check" method="post">
     <p>输入新闻</p>
     <textarea name="msg" rows="5" cols="100"> </textarea>

@@ -1,11 +1,14 @@
 from bottle import route, run, template, get, post, request, redirect
+import bottle
 import fastText
 import jieba.analyse
 import sys
+import os     
 
 classifer = fastText.load_model("news.model.bin")
 msgs = []
 stopwords = []
+title = ""
 
 categories = {
     "home": "首页",
@@ -26,7 +29,7 @@ categories = {
 
 @get('/')
 def check():
-    return template('check', msgs=reversed(msgs))
+    return template('check', msgs=reversed(msgs), title=title)
 
 
 @post('/clear')
@@ -40,7 +43,7 @@ def do_check():
     msg = request.forms.msg.replace('\r\n', '')
 
     if check_contain_chinese(msg) == False:
-        msgs.append(msg+"：不支持纯英文检测！")
+        msgs.append(msg + "：不支持纯英文检测！")
         redirect('/')
     cutmsg = cut_sentence(msg)
 
@@ -48,12 +51,10 @@ def do_check():
     predictResults = []
     for index, lable in enumerate(result[0]):
         lableNum = lable[len("__lable__"):]
-        strResult = "{}={:.0%}".format(
-            categories[lableNum], result[1][index])
+        strResult = "{}={:.0%}".format(categories[lableNum], result[1][index])
         predictResults.append(strResult)
 
-    predictResult = "{}：[{}]".format(
-        msg, ",".join(predictResults))
+    predictResult = "{}：[{}]".format(msg, ",".join(predictResults))
     msgs.append(predictResult)
     savetohistory(predictResult)
     redirect('/')
@@ -76,7 +77,7 @@ def cut_sentence(sentence):
 
 def savetohistory(msg):
     with open('check.history.txt', 'a') as file:
-        file.write(msg+"\n")
+        file.write(msg + "\n")
 
 
 def check_contain_chinese(check_str):
@@ -87,6 +88,12 @@ def check_contain_chinese(check_str):
 
 
 if __name__ == "__main__":
-    stopwords = [line.strip() for line in open(
-        'stopwords.txt', 'r', encoding='utf-8').readlines()]
-    run(host="172.25.125.169", port=8080, debug=True)
+    abs_app_dir_path = os.path.dirname(os.path.realpath(__file__))
+    abs_views_path = os.path.join(abs_app_dir_path, 'views')
+    bottle.TEMPLATE_PATH.insert(0, abs_views_path )
+    title = " ".join(categories.values())
+    stopwords = [
+        line.strip()
+        for line in open('stopwords.txt', 'r', encoding='utf-8').readlines()
+    ]
+    run(host="localhost", port=8090, debug=True)
